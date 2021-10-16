@@ -2,7 +2,7 @@ import sys as _sys
 _sys.path.append(".")
 from .htsv import RunServer
 from .srvrun import run
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 if __name__=="__main__":
 	if len(_sys.argv)<=1:

@@ -4,11 +4,10 @@ import argparse
 
 def run():
 	arg=argparse.ArgumentParser()
-	arg.add_argument("--port",metavar="p",type=int,default=6666)
+	arg.add_argument("-p","--port",type=int,default=6666)
 	cfg=arg.parse_args()
-	RunServer(cfg.portnum)
+	RunServer(cfg.port)
 
-exit()
 if __name__=="__main__":
 	if len(_sys.argv)<=1:
 		portnum=6666
