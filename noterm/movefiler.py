@@ -471,37 +471,3 @@ def SetCmd(key,arg):
 			return "ok"
 		return tne+"not a interactive process."
 	return tne +"not running."
-
-if __name__=="__main__":
-	import time
-	q=InterCom(".")
-	time.sleep(0.5)
-	print(getStatusLog())
-	#q.quecmd("exit")
-	time.sleep(0.5)
-	q.quecmd("exit")
-	#q.stop()
-	time.sleep(2.0)
-	print(getStatusLog())
-	print(GetLogOf("[0].",0))
-	exit()
-	_srcp="../ttt/tus/yyy"
-	_desp="/storage/emulated/0/document/../document/pycodes/ttt/tut/yyy"
-	#res,resp=makemovelist(srcp,desp,True)
-	reqs=[_srcp+":"+_desp,_desp+":"+_srcp]
-	aftreq=";.../../tu:.../../u"
-	aftreq=""
-	for req in reqs:
-		mvf=MoveFile(req+aftreq,False)
-		n=0
-		while(mvf.is_alive()):
-			print(getProcList())
-			time.sleep(0.5)
-			n+=1
-			if n>=300:
-				break
-	print(getTraceLog())
-		#if err is not None:
-		#	print(err)
-
-
