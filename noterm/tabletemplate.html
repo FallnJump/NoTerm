@@ -1,0 +1,1802 @@
+<html>
+    <script>
+    var dom="http://localhost:6060/";
+    var initpath="/";
+    /*document.addEventListener("touchend",function(e){
+        e.preventDefault();
+    });*/
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <body>
+        <style type="text/css">
+            img.thumb{
+                min-width:40%;
+                max-width:100%;
+                height:50pt;
+                width:auto;
+            }
+            th{
+                font-size: 9pt;
+                height: 30pt;
+            }
+            td.thumb{
+                text-align:center;
+            }
+            td.sz,.updt{
+                font-size:9pt;
+            }
+            div.wrkpath{
+                font-size:9pt;
+                width:160px;
+                height:10pt;
+                //overflow-x:scroll;
+                //overflow-y:scroll;
+            }
+            div.fname{
+                width:160px;
+                height:37pt;
+               // overflow-x:scroll;
+            }
+            span.soidx{
+                font-size: 8pt;
+            }
+            select.argaln{
+                font-size:12pt;
+            }
+            select.pagesel{
+                font-size:14pt;
+                width:250px;
+            }
+            a.fname{
+                font-size:10pt;
+            }
+            div.rgttab{
+                width:1280px;
+                height:1040px;
+                overflow:scroll;
+            }
+            input.defbut,.defbut2{
+                font-size: 15pt;
+            }
+            input.defbut2{
+                width:45px;
+            }
+        </style>
+        Status: &ensp;&ensp;<input type=button onclick="changefrange();" value="Reload Table" class=defbut>
+        <pre style="background-color:#ccffff;width:1560px;height:40px;overflow:scroll;" id=sttdiv>Ready</pre>
+        <table border=2>
+            <tr><td rowspan=2 style="vertical-align:top;">
+        <div style="width:200pt;height:1100pt;overflow-x:scroll;overflow-y:scroll;" id=filer>
+        <table class="ftbl" style="width:480px" border=1>
+            <tr><td>
+                <table border=2 class=titletbl>
+                <colgroup>
+                    <col width=50px>
+                    <col width=90px>
+                    <col width=120px>
+                    <col width=50px>
+                    <col width=60px>
+                    <col width=90px>
+                </colgroup>
+                <tr><th colspan=6 style="font-size: 12pt; background-color: #ff9fff;" class="tbltitle">File List</th></tr>
+                <tr><td colspan=6 class=palette></td></tr>
+                <tr><td colspan=6 class=dirinfo>Current Dir:<div class=dirinfo style="width:430px;overflow-x:scroll;" nowrap>&nbsp;</div><br>File count=<span class=flnum>&nbsp;</span> Viewing.<br>Change-Range:<select class=pagesel onchange="changefrange();"></select><br>
+                </td></tr>
+                <tr><td colspan=6>
+                    <span class=fselnum>0/0
+                    </span> Files Selected. 
+                </td></tr>
+                    <tr>
+                        <th rowspan=1 class=si0>
+                            Chk<span class=soidx>&nbsp;</span>
+                        </th>
+                        <th rowspan=2>
+                            Thumb.
+                        </th>
+                        <th class=si1>
+                            File Name<span class=soidx>&nbsp;</span>
+                        </th>
+                        <th class=si5 rowspan=2>
+                            Kind<br><span class=soidx>&nbsp;</span>
+                        </th>
+                        <th rowspan=2 class=si2>
+                            Size<br><span class=soidx>&nbsp;</span>
+                        </th>
+                        <th rowspan=2 class=si3>
+                            Update Time<br><span class=soidx>&nbsp;</span>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class=si6>
+                            Aln<span class=soidx>&nbsp;</span>
+                        </th>
+                        <th class=si4>
+                            Dir Name<span class=soidx>&nbsp;</span>
+                        </th>
+                    </tr>
+                </table>
+            </td></tr>
+            <tbody style="display:block;overflow-y:scroll;height:300pt;"><tr><td>
+                <table border=2 class=itemtbl>
+                <colgroup>
+                    <col width=50px>
+                    <col width=90px>
+                    <col width=170px>
+                    <col width=60px>
+                    <col width=90px>
+                </colgroup>
+                </table>
+            </td></tr></tbody>
+        </table>
+    <hr>
+    </div></td><td>
+    <input type=button value=Preview onclick="toggleview(0);" class=defbut>
+    <input type=button value=Commm onclick="toggleview(1);" class=defbut>
+    <input type=button value=Shell onclick="toggleview(2);" class=defbut>
+    </td></tr><tr><td style="vertical-align:top;">
+    <div style="min-width:1280px;min-height:900px;" id=prevtab>
+    <img src="" width=288px>
+    </div>
+    <div id=commtab class=rgttab hidden>
+        <input type=button class=defbut value="new task" onclick="execShell(-1);">
+        <table border=2 id=stattbl>
+            <thead style="display:block;">
+                <tr>
+                    <th style="width:60px;">Stop<br>Act.</th>
+                    <th style="width:140px;">Thread<br>Name</th>
+                    <th style="width:300px;">Args</th>
+                    <th style="width:100px;">Start Time</th>
+                    <th style="width:100px;">Running Time</th>
+                    <th style="width:550px;">Status</th>
+                </tr>
+            </thead>
+            <tbody style="display:block;height:780px;overflow-y:scroll;">
+            </tbody>
+        </table>
+    </div>
+    <div id=shltab class=rgttab hidden>
+        <table border=2>
+        <tr><td>
+        Input Command: <input type=button value="exec as new shell"class=defbut onclick="execShell(0);">
+        <input type=button value="exec as new" class=defbut onclick="execShell(1);">
+        <input type=button value="exec" class=defbut onclick="execShell(2);">
+        <input type=button value="clear input" class=defbut ondblclick="clearShell();"><br>
+        <input type=button class=defbut value="Save as..." onclick="ShlSave();"><input type=text value="" id=shlsaveat size=50><br>
+        <textarea id=shledit rows=10 cols=70></textarea>
+        <br>
+        parsed command is:
+        <br>
+        <textarea id=shlprs rows=10 cols=70 readonly></textarea>
+        </td><td>
+        argument list:
+        <table border=2 id=argtbl>
+            <thead><tr>
+                <th style="width:90px;height:25px;overflow-y:visible;background-color:#ffffc0;">symbol</th><th style="width:480px;height:25px;overflow-y:visible;background-color:#ffffc0;">Contains</th>
+            </tr></thead>
+            <tbody></tbody>
+        </table>
+        </td>
+        </tr><tr>
+            <td colspan=2>
+        <div style="font-size:15pt;">
+            command pallete:
+        </div>
+        <input type=button value="Save[double click!]" class=defbut ondblclick="saveshlist();">&ensp;<input type=button value="load[double click!]" class=defbut ondblclick="loadshlist();">&ensp;Current File:&ensp;<input type=text size=90 value="./default.shlist" id=shlistsel>
+        <br>
+        <table border=2 id=palitemtbl>
+            <thead style="display:block;">
+                <tr><th style="width:100px;">Act.</th><th style="width:280px;">Name</th><th style="width:820px;align:left;">Content</th></tr>
+            </thead>
+            <tbody style="display:block;overflow:scroll;height:500px;">
+                
+            </tbody>
+            <tbody class=memo hidden>
+                
+            </tbody>
+        </table>
+            </td>
+        </tr>
+        </table>
+    </div>
+    <div id=termemul hidden>
+        <div hidden>
+        <input type=button class=defbut value="   upper   ">
+        <input type=button class=defbut value="   lower   ">
+        <input type=text size=100 id=imidiateln><br>
+        </div>
+        <input type=button class=defbut value="    put    " onclick="imidedit_put();">
+        <input type=button class=defbut value="    add    " onclick="imidedit_add();">Name><input type=text id=termshlname size=50><br>
+        <textarea style="width:630px;height:100px;overflow:scroll;" ondblclick="chgImidiateMode(this);" id=imidedit></textarea>
+        <textarea style="width:630px;height:100px;overflow:scroll;" id=imidprs></textarea>
+        <div style="font-size: 15pt;">Console log></div>
+        <div ondblclick="consolewnd.reload_span();">
+        <pre id=consolewnd style="width:1260px;height:300px;"></pre>
+        </div>
+    </div>
+    </td>
+    </tr></table>
+    <script src="./consolestyle.js"></script>
+    <script src="./alert_ex.js"></script>
+    <script>
+
+    // ************ //
+    function ShlSave(){
+        fln=prompt("put the file name you want to save to",shlsaveat.value);
+        if(fln==null || fln=="") {
+            return;
+        }
+        posttext("save_shl",dom+"s?"+fln,FileChange_OkWrn,shledit.value);
+        shlsaveat.value=fln;
+    }
+    function Text_GetLineText(obj){
+        var st=obj.selectionStart;
+        var src=obj.value;
+        var srcl=src.length;
+        var stl=src.lastIndexOf("\n",st-1)+1;
+        var edl=src.indexOf("\n",st);
+        if(edl<0) edl=srcl;
+        return src.slice(stl,edl);
+    }
+    function Text_ToNextLine(obj,withlastln=true){
+        var st=obj.selectionStart;
+        var b=false;
+        
+        st=obj.value.indexOf("\n",st)+1;
+        if(st==0){
+            b=true;
+            st=obj.value.length;
+        }
+        if(withlastln){
+            st=obj.value.indexOf("\n",st);
+            if(st==0){
+                st=obj.value.length;
+                b=true;
+            }
+        }
+        obj.setSelectionRange(st,st);
+        return b;
+    }
+    function Text_KdNotBlur(e){
+        var src=e.srcElement.value;
+        var srcl=src.length;
+        var ln0=0,ln1=0;
+        ln0=src.indexOf("\n");
+        if(ln0==-1) ln0=src.length;
+        ln1=src.lastIndexOf("\n");
+        if(ln1==-1) ln1=0;
+        var st=e.srcElement.selectionStart;
+        if((e.keyCode==37 && st<=0) || (e.keyCode==38 && st<=ln0)){
+            e.srcElement.setSelectionRange(0,0);
+            return false;
+        }
+        if((e.keyCode==39 && st>=srcl) || (e.keyCode==40 && st>ln1)){
+            e.srcElement.setSelectionRange(srcl,srcl);
+            return false;
+        }
+    }
+    function Text_KdRun(e){
+        var obj=e.srcElement;
+        if(obj.runmode){
+            if(e.keyCode==13){
+                posttext("shellcom",dom+"cmd?"+consolewnd.selkey,function(restext){
+                    StateChange_OkWrn(restext);
+                    consolewnd.reload_span(null,true);
+                }
+                ,Text_GetLineText(obj));
+                return Text_ToNextLine(obj);
+            }
+        }
+        return Text_KdNotBlur(e);
+    }
+    function execShell(mode){
+        var reqtsk="exec";
+        var cdwp="cd "+ftbl.workpath+"\n";
+        var url=dom;
+        var ctt=cdwp;
+        switch(mode){
+            case -1:
+                url+="qcmd?Term";
+                break;
+            case 0:
+                url+="icmd?CmpShl";
+                break;
+            case 1:
+                url+="qcmd?OpenShl";
+                break;
+            case 2:
+                url+="cmd?"+workpath.selkey;
+                break;
+            default:
+                return;
+        }
+        posttext(reqtsk,url,(restxt)=>{
+            StateChange_OkWrn(restxt);
+            reloadstatus(()=>{
+                selviewtgtask(null);
+            });
+        },ctt);
+    }
+    function Text_AttachParseAt(obj,parseAt){
+        obj.oninput=function(){tryparseShell(this);}
+        obj.parseAt=parseAt;
+        obj.parseAt.timer=null;
+    }
+    
+
+    Text_AttachParseAt(shledit,shlprs);
+    Text_AttachParseAt(imidedit,imidprs);
+    shledit.onkeydown=function(e){
+        return Text_KdNotBlur(e);
+    };
+    imidedit.onkeydown=function(e){
+        return Text_KdRun(e);
+    };
+    sttdiv.timer=null;
+    sttdiv.colors=[["#ccffff","#00ffff"],["#ffffcc","#ffff00"],["#ffcccc","ff7f7f"]];
+    var lastwd="";
+    var sortkind=7;
+    var oftbl=document.body.querySelector("table.ftbl");
+    var ostbl=oftbl.cloneNode(true);
+    ostbl.querySelector("td.dirinfo").hidden=true;
+    function StateChange(newstate,id){
+        function clearStt(){
+            if(sttdiv.timer!=null){
+                clearTimeout(sttdiv.timer.timer);
+                sttdiv.timer=null;
+            }
+        }
+        function ReStt(){
+            var clrs;
+            if(sttdiv.timer.count>=sttdiv.timer.blink.length){
+                clrs=sttdiv.colors[0][0];
+            }else{
+                var bid=sttdiv.timer.blink[sttdiv.timer.count];
+                if(isNaN(bid)){
+                    sttdiv.timer.step=bid[1];
+                    bid=bid[0];
+                }
+                clrs=sttdiv.colors[sttdiv.timer.id][bid];
+            }
+            sttdiv.style.backgroundColor=clrs;
+            if(sttdiv.timer.count>=sttdiv.timer.blink.length){
+                clearStt();
+                sttdiv.innerHTML="Ready";
+            }else{
+                sttdiv.timer.count++;
+                sttdiv.timer.timer=setTimeout(ReStt,sttdiv.timer.step);
+            }
+        }
+        function NewStt(id){
+            clearStt();
+            sttdiv.timer={
+                timer: null,
+                blink: [[1,600],0,1,0,1,0,1,0,1,0,1,[0,5000]],
+                id: id,
+                step: 600,
+                count:0
+            };
+            ReStt();
+        }
+        sttdiv.innerHTML=newstate;
+        NewStt(id);
+    }
+    function StateChange_Ok(newstate){
+        StateChange(newstate,0);
+    }
+    function StateChange_Warning(newstate){
+        StateChange(newstate,1);
+    }
+    function StateChange_Error(newstate){
+        StateChange(newstate,2);
+    }
+    function StateChange_OkWrn(newstate){
+        var id=(newstate=="ok"?0:1);
+        StateChange(newstate,id);
+    }
+    function FileChange_Ok(newstate){
+        StateChange(newstate,0);
+        changefrange();
+    }
+    function FileChange_OkWrn(newstate){
+        var id=(newstate=="ok"?0:1);
+        StateChange(newstate,id);
+        if(id==0){
+            changefrange();
+        }
+    }
+    function FlistAlign(sortres){
+        FlistAlign_init(this,sortres);
+    }
+    function FlistAlign_init(obj,sortres){
+        if(sortres==null)
+        {
+            obj._org2sortidx=null;
+            obj._sortres=null;
+            return;
+        }
+        obj._org2sortidx=new Array(sortres.length);
+        for(var i=0;i<sortres.length;i++)
+        {
+            obj._org2sortidx[sortres[i]]=i;
+        }
+        obj._sortres=sortres.slice();
+        return obj;
+    }
+    function FlistAlign_org2sortidx(obj,num){
+        return obj._org2sortidx==null?num:obj._org2sortidx[num];
+    }
+    function FlistAlign_sortidx2org(obj,num){
+        return obj._sortres==null?num:obj._sortres[num];
+    }
+    function FlistAlign_getorgs(obj,num1,num2){
+        var resarr;
+        num1=FlistAlign_org2sortidx(obj,num1);
+        num2=FlistAlign_org2sortidx(obj,num2);
+        nst=Math.min(num1,num2);
+        ned=Math.max(num1,num2);
+        resarr=new Array(ned-nst+1);
+        for(var n=nst;n<=ned;n++){
+            resarr[n-nst]=FlistAlign_sortidx2org(obj,n);
+        }
+        return resarr;
+    }
+    function Filelist(otblctl){
+        this.flist=[];
+        this.dlist={};
+        this.faln=new FlistAlign(null);
+        this.selst=-1;
+        this.selarr=[];
+        this.titmctrls=[];
+        this.sortidxs=[];
+        this.otbl=otblctl;
+        this.args={seq:new Array(10),sel:[]};
+        this.workpath="";
+    }
+    Filelist.prototype.chg=(ref)=>{
+        this.flist=ref.flist;
+        this.dlist=ref.dlist;
+        this.faln=ref.faln;
+        this.selst=ref.selst;
+        this.selarr=ref.selarr;
+        this.titmctrls=ref.titmctrls;
+        this.sortidxs=ref.sortidxs;
+        this.otbl=ref.otbl;
+        this.args=ref.args;
+        this.workpath=ref.workpath;
+    }
+
+    function Filelist_rgt_sel(obj,tnum)
+    
+    //Filelist.prototype.rgt_sel=(tnum)=>
+    {
+        var faln=obj.faln;
+        if(tnum!=null)
+        {
+            if(obj.selst==-1){
+                obj.selst=tnum;
+            }
+            if(tnum>=0){
+                obj.selarr=FlistAlign_getorgs(faln,obj.selst,tnum);
+            }else{
+                obj.selarr=[];
+                obj.selst=-1;
+            }
+        }
+        for(var i=0;i<obj.titmctrls.length;i++){
+            var tg=obj.titmctrls[i];
+            var chkd=tg.querySelector("input.stkchk").checked;
+            var clrsty=(chkd?"rgb(255,255,127)":"");
+            if(tg.style.backgroundColor!="" || clrsty!="")
+            {
+                tg.style.backgroundColor=clrsty;
+            }
+        }
+        for(var i=0;i<obj.selarr.length;i++){
+            var tg=obj.titmctrls[obj.selarr[i]];
+            
+            tg.style.backgroundColor="rgb(127,255,255)";
+        }
+    }
+
+    function Filelist_showthumb(obj,tnum)
+    //Filelist.prototype.showthumb=(tnum)=>
+    {
+        var sn=FlistAlign_org2sortidx(obj.faln,tnum);
+        var rng=10;
+        var st=Math.max(0,sn-rng);
+        var ed=Math.min(obj.flist.length,sn+rng);
+        
+        for(var i=st;i<=ed;i++){
+            var fi=FlistAlign_sortidx2org(obj.faln,i);
+            var tg=obj.titmctrls[fi];
+            var tgim=tg.querySelector("img");
+            if(tgim.src==""){
+                var fnm=tg.querySelector("a.fname").innerHTML;
+                var wrkpath=tg.querySelector("div.wrkpath").innerHTML;
+                tgim.src=dom+"media?"+wrkpath+fnm+"|p";
+            }
+        }
+    }
+    
+    function getfullpath(itmctl){
+        return itmctl.querySelector("div.wrkpath").innerHTML+itmctl.querySelector("a.fname").innerHTML;
+    }
+    
+    var ftbl=new Filelist(oftbl);
+    var stbl=new Filelist(ostbl);
+    var tables=[ftbl,stbl];
+    imidedit.runmode=false;
+    </script>
+    <script>
+
+
+    // ******************* //
+
+    function aligntable(tblobj){
+        var th=tblobj.querySelector("thead").querySelector("tr").querySelectorAll("th");
+        var tbs=tblobj.querySelector("tbody").querySelectorAll("tr");
+        for(var i=0;i<tbs.length;i++){
+            var tds=tbs[i].querySelectorAll("td");
+            for(var j=0;j<tds.length;j++){
+                tds[j].style.width=th[j].style.width;
+            }
+        }
+    }
+    function chgImidiateMode(obj){
+        imidedit.runmode=!imidedit.runmode;
+        imidedit.style.backgroundColor=imidedit.runmode?"#ffffcc":"#ffffff";
+    }
+    function commontbl_delrow(obj){
+        getParentTag(obj,"TR").remove();
+    }
+    function palitemtbl_mkrow(name,content,pat){
+        var cmd,bg;
+        if(pat){
+            cmd=`
+                <input type=button value="^" class=defbut2 onclick="palitemtbl_updwn(this,true);">
+                <input type=button value="put" class=defbut2 onclick="palitemtbl_put(this);" oncontextmenu="palitemtbl_putr(this);"><br><br>
+                <input type=button value="v" class=defbut2 onclick="palitemtbl_updwn(this,false);">
+                <input type=button value="del" class=defbut2 ondblclick="commontbl_delrow(this);">
+            `;
+            bg="";
+        }else{
+            cmd=`<input type=button value="add" class=defbut2 onclick="palitemtbl_onadd(this);">`;
+            bg=`style="background-color:#ffff7f;" class=addcmd`;
+        }
+        return `<tr ${bg}><td>${cmd}</td><td><input type=text value="${name}" size=28 class=cmdname></td><td><textarea rows=4 cols=105>${content}</textarea></td></tr>`;
+    }
+    function getParentTag(obj,tagName){
+        var tg=obj;
+        while(tg!=null && tg.tagName!=tagName){
+            tg=tg.parentNode;
+        }
+        return tg;
+    }
+    function changeShellEdit(newstr){
+        shledit.value=newstr;
+        parseShell();
+    }
+    function clearShell(){
+        changeShellEdit("");
+    }
+    function parseStrCore(ref){
+        var seqs=argtbl.querySelector("tbody").querySelectorAll("tr");
+        seqs.forEach((e)=>{
+            var tds=e.querySelectorAll("td");
+            var argnm=tds[0].innerHTML;
+            var ctt=tds[1].querySelector("div").innerHTML;
+            if(argnm[0]=="$" && ctt!="" && argnm!="$-"){
+                argrg=new RegExp("\\"+argnm,"g");
+                ref=ref.replace(argrg,ctt);
+            }
+        });
+        function rplaceline(refsect){
+            var res=[];
+            while(true){
+                var idx=refsect.indexOf("$-");
+                if(idx<0){
+                    break;
+                }
+                var befi=refsect.lastIndexOf("\n",idx);
+                var afti=refsect.indexOf("\n",idx);
+                if(befi<0) befi=-1;
+                if(afti<0){
+                    afti=refsect.length;
+                    refsect+="\n";
+                }
+                res.push(refsect.slice(0,befi+1));
+                res.push(refsect.slice(befi+1,afti+1));
+                refsect=refsect.slice(afti+1);
+            }
+            var rstr="";
+            for(var i=0;i<res.length;i+=2){
+                rstr+=res[i];
+                for(var t=0;t<stbl.args.sel.length;t++){
+                    rstr+=res[i+1].replace(/\$\-/g,stbl.args.sel[t]);
+                }
+            }
+            return rstr+refsect;
+        }
+        var refa=ref.split("${");
+        res=rplaceline(refa[0]);
+        for(var i=1;i<refa.length;i++){
+            var tktmpl,tkend,rstr;
+            var tki=refa[i].indexOf("$}");
+            if(tki<0){
+                tktmpl=refa[i];
+                tkend="";
+            }else{
+                tktmpl=refa[i].slice(0,tki);
+                tkend=rplaceline(refa[i].slice(tki+2));
+            }
+            rstr="";
+            for(var t=0;t<stbl.args.sel.length;t++){
+                rstr+=tktmpl.replace(/\$\-/g,stbl.args.sel[t]);
+            }
+            res+=rstr+tkend;
+        }
+        return res;
+    }
+    function parseShell_core(obj){
+        obj.parseAt.innerHTML=parseStrCore(obj.value);
+        if(obj.parseAt.timer!=null){
+            clearTimeout(obj.parseAt.timer);
+            obj.parseAt.timer=null;
+        }
+    }
+    function parseShell(){
+        var objs=[shledit,imidedit];
+        for(var i=0;i<objs.length;i++){
+            parseShell_core(objs[i]);
+        }
+    }
+    function tryparseShell(obj=shledit){
+        if(obj.parseAt.timer==null){
+            obj.parseAt.timer=setTimeout(function(){parseShell_core(obj);},500);
+        }
+    }
+    function palitemtbl_getrow(obj){
+        var tr=getParentTag(obj,"TR");
+        var nm=tr.querySelector("input[type='text']").value;
+        var ctt=tr.querySelector("textarea").value;
+        return [nm,ctt];
+    }
+    function palitemtbl_row2shlist(){
+        var res="";
+        var trs=palitemtbl.querySelector("tbody").querySelectorAll("tr");
+        for(var i=1;i<trs.length;i++){
+            var info=palitemtbl_getrow(trs[i]);
+            if(info[1]=="" || info[1][info[1].length-1]!="\n"){
+                info[1]+="\n";
+            }
+            if(i>1){
+                res+="###***###\n";
+            }
+            res+=`#${info[0]}\n${info[1]}`;
+        }
+        return res;
+    }
+    function commonshell_onadd(nm,ctt){
+        
+        var obj=palitemtbl;
+        var tb=obj.querySelector("tbody");
+        //var tb=getParentTag(obj,"TBODY");
+        var tmm=obj.querySelector("tbody.memo");//getParentTag(obj,"TABLE").querySelector("tbody.memo");
+        tmm.innerHTML=palitemtbl_mkrow(nm,ctt,true);
+        tb.appendChild(tmm.querySelector("tr"));
+    }
+    function palitemtbl_onadd(obj){
+        commonshell_onadd(...palitemtbl_getrow(obj));
+        return;
+        var tb=getParentTag(obj,"TBODY");
+        var tmm=getParentTag(obj,"TABLE").querySelector("tbody.memo");
+        tmm.innerHTML=palitemtbl_mkrow(...palitemtbl_getrow(obj),true);
+        tb.appendChild(tmm.querySelector("tr"));
+    }
+    function palitemtbl_updwn(obj,toUp){
+        var tb=getParentTag(obj,"TBODY");
+        var tr=getParentTag(obj,"TR");
+        var hd=tb.querySelector("tr.addcmd");
+        if(toUp){
+            if(tr.previousSibling!=hd){
+                tb.insertBefore(tr,tr.previousSibling);
+            }
+        }else{
+            if(tr.nextSibling!=null){
+                tb.insertBefore(tr,tr.nextSibling.nextSibling);
+            }
+        }
+    }
+    function commonshell_put(txt,obj=shledit){
+        var st=obj.selectionStart;
+        var edt=obj.value;
+        var edth=edt.substring(0,st);
+        var edtf=edt.substring(st);
+        if(edth!="" && edth[edth.length-1]!="\n"){
+            edth+="\n";
+            st++;
+        }
+        if(edtf[0]!="\n"){
+            edtf="\n"+edtf;
+        }
+        var rt=txt;
+        if(rt[0]=="\n"){
+            rt=rt.substring(1);
+        }
+        while(rt[rt.length-1]=="\n"){
+            rt=rt.substring(0,rt.length-1);
+        }
+        if(shledit=obj){
+            changeShellEdit(edth+rt+edtf);
+        }
+        var selp=st+rt.length+1;
+        obj.setSelectionRange(selp,selp);
+        obj.focus();
+    }
+    function palitemtbl_put(obj){
+        commonshell_put(palitemtbl_getrow(obj)[1]);
+    }
+    function palitemtbl_putr(obj){
+        commonshell_put(palitemtbl_getrow(obj)[1],imidedit);
+    }
+    function imidedit_put(){
+        commonshell_put(imidedit.value);
+    }
+    function imidedit_add(){
+        commonshell_onadd(termshlname.value,imidedit.value);
+        return;
+        var add_tr=palitemtbl.querySelectorAll("tr")[0];
+        palitemtbl_onad
+        add_tr.querySelector("input[type=text").value=termshlname.value;
+        add_tr.querySelector("textarea").value=imidedit.value;
+    }
+    function loadshlist(fnm=null){
+        if(fnm!=null){
+            shlistsel.value=fnm;
+        }
+        function load_core(restxt){
+            var arr=restxt.split("###***###\n");
+            var res=palitemtbl_mkrow("","",false);
+            for(var t=0;t<arr.length;t++){
+                var ni=arr[t].indexOf("\n");
+                if(ni<0){
+                    ni=arr[t].length;
+                }
+                var nm=arr[t].substring(1,ni);
+                var ctt=arr[t].substring(ni+1);
+                res+=palitemtbl_mkrow(nm,ctt,true);
+            }
+            
+            var tbd=palitemtbl.querySelector("tbody");
+            tbd.innerHTML=res;
+            aligntable(palitemtbl);
+        }
+        gettext("shtext",dom+"file?"+shlistsel.value,load_core,()=>{load_core("");});
+    }
+    function saveshlist(){
+        posttext("saveshlist",dom+"sf?"+shlistsel.value,FileChange_Ok,palitemtbl_row2shlist());
+    }
+    function toggleview(idx){
+        var tabs=[prevtab,commtab,shltab];
+        for(var i=0;i<tabs.length;i++){
+            tabs[i].hidden=(i!=idx);
+        }
+        termemul.hidden=(idx==0);
+        if(tabs[idx]==commtab){
+            reloadstatus();
+        }
+    }
+    function consoleinit(obj){
+        obj.reloadtimer=
+        function(selkey=null,time=null,withendscroll=false){
+            var tobj=obj;
+            if(tobj.reload_spantimer!=null){
+                clearTimeout(tobj.reload_spantimer);
+                tobj.reload_spantimer=null;
+            }
+            if(selkey==tobj.selkey){
+                if(tobj.reload_reserved || selkey==null){
+                    tobj.reload_reserved=false;
+                    tobj.lasttime=0;
+                    return;
+                }
+            }
+            if(time!=null){
+                tobj.lasttime=time;
+            }
+            if(tobj.lasttime>=0){
+                tobj.reload(selkey,function(){
+                    if(obj.lasttime>0){
+                        tobj.reload_spantimer=setTimeout(function(){
+                            tobj.reload_spantimer=null;
+                            tobj.reloadtimer();
+                        },tobj.lasttime);
+                    }
+                },withendscroll);
+                if(obj.lasttime>0){
+                    tobj.reload_reserved=true;
+                }
+            }
+        }
+        obj.reload=
+        function(selkey=null,callback=null,withendscroll=false){
+            var tobj=obj;
+            var sln,cls;
+            if(selkey!=null){
+                tobj.selkey=selkey;
+            }
+            if(tobj._selkey_bak!=tobj.selkey){
+                sln=0;
+                cls=true;
+                sln=-1;
+            }else{
+                sln=tobj.eline-1;
+                cls=false;
+            }
+            obj._selkey_bak=obj.selkey;
+            var url=dom+"icmd_log?"+tobj.selkey+"|||"+Math.max(sln,0);
+            gettext("consrel",url,(restext)=>{
+                var d=restext.indexOf("\n");
+                var sted=restext.slice(0,d).split(":");
+                var ctt=restext.slice(d+1,-1);
+                tobj.sline=sted[0]*1;
+                tobj.eline=sted[1]*1;
+                setConsoleStr(tobj,ctt,tobj.sline,cls);
+                if(callback!=null){
+                    callback();
+                }
+                if(withendscroll){
+                    var tbd=getParentTag(tobj,"TABLE");
+                    tbd.scrollTop=tbd.scrollHeight;
+                }
+            },()=>{tobj.reload_reserved=false;tobj.lasttime=0;tobj.reload_spantimer=null;});
+        }
+        obj.reload_span=function(selkey=null,withendscroll=false){
+            var tobj=obj;
+            tobj.reloadtimer(selkey,(selkey==null?null:5000),withendscroll);
+        }
+        obj.lasttime=0;
+        obj.reload_spantimer=null;
+        obj.reload_reserved=false;
+        setConsoleStr(obj,"",-1);
+        obj._selkey_bak=null;
+    }
+    function coloringStatus(tblobj){
+        tblobj=getParentTag(tblobj,"TABLE");
+        var trs=tblobj.querySelector("tbody").querySelectorAll("tr");
+        trs.forEach((e)=>{
+            var selkey=e.querySelectorAll("td")[1].innerHTML;
+            var clr;
+            if(consolewnd.selkey==selkey){
+                if(consolewnd.reload_reserved){
+                    clr="#ccffff";
+                }else{
+                    clr="#ffffcc";
+                }
+            }else{
+                var itms=e.querySelectorAll("td");
+                if(itms[itms.length-1].querySelector("div").innerHTML!="ended."){
+                    clr="#ffffff";
+                }else{
+                    clr="#c0c0c0";
+                    itms[0].querySelector("input").disabled=true;
+                }
+            }
+            e.style.backgroundColor=clr;
+        });
+    }
+    function selviewtgtask(tdobj){
+        if(tdobj==null){
+            var maxi=-1;
+            var maxe=null;
+            var sttbody=stattbl.querySelector("tbody");
+            var tc=sttbody.querySelectorAll("tr");
+            tc.forEach((e)=>{
+                var tgkey=e.querySelectorAll("td")[1].innerHTML;
+                var cur=tgkey.split("]")[0].split("[")[1]*1;
+                if(cur>maxi){
+                    maxi=cur;
+                    maxe=e;
+                }
+            });
+            tdobj=maxe;
+            if(tdobj==null) return;
+        }
+        consolewnd.reload_span(tdobj.parentNode.querySelectorAll("td")[1].innerHTML
+        ,true);
+        coloringStatus(tdobj);
+    }
+
+    function reloadstatus(callback=null){
+        function settr(ch,tks){
+            var res=`<tr><td style="width:${ch[0].style.width};"><input type=button value=stop ondblclick="gettext('stoptask','${dom}stop?${tks[0]}',()=>{setTimeout(()=>{reloadstatus();},800);});"></td>`;
+            var ocr=` onclick="selviewtgtask(this);"`;
+            for(var j=0;j<tks.length;j++)
+            {
+                var intext=tks[j];
+                if(j==tks.length-1){
+                    intext=`<div>${intext}</div>`;
+                }
+                //alert1(ch[j].style.width);
+                res+=`<td style="width: ${ch[j+1].style.width};" ${ocr}>${intext}</td>`;
+            }
+            return res+"</tr>";
+        }
+        gettext("status",dom+"status?.",restxt=>{
+            restxt=restxt.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/%20/g," ");
+            var respa=restxt.split("\n");
+            var ic=respa[0]*1;
+            var stt="";
+            var stth=stattbl.querySelector("thead");
+            var sttbody=stattbl.querySelector("tbody");
+            var ch=stth.querySelectorAll("th");
+            //var cc=sttcol.querySelectorAll("col");
+            for(var i=0;i<ic;i++){
+                var tks=respa[2+i].split("|||");
+                stt+=settr(ch,tks);
+            }
+            var endloga=("\n"+respa.slice(ic+3).join("\n")).split("-------- log end").slice(0,-1);
+            for(var i=0;i<endloga.length;i++){
+                var g=endloga[i].split("\n")[1];
+                var tks=g.split("|||");
+                stt+=settr(ch,tks);
+            };
+            sttbody.innerHTML=stt;
+            coloringStatus(sttbody);
+            //statustext.innerHTML=restxt;
+            if(callback!=null){
+                callback();
+            }
+        });
+    }
+    
+    function getctrl(ele,...args){
+        var nct=ele;
+        for(var g=0;g<args.length;g++){
+            nct=nct.querySelector(args[g]);
+            if(nct==null)return null;
+        }
+        return nct;
+    }
+    function makepalcmd(val,_id){
+        return `<input type="button" style="font-size: 11pt;height:20pt;" value="${val}" onclick="on_pallete('${_id}');"> `;
+    }
+    function makeDir(){
+        res=prompt("Enter new-directory name.");
+        if(res==null){
+            return;
+        }else{
+            var url=dom+"mkpath?"+ftbl.workpath+res+"/";
+            alert(url);
+            gettext("mkdir",url,FileChange_OkWrn);
+        }
+    }
+    function makeFile(){
+        res=prompt("Enter new-file name.");
+        if(res==null){
+            return;
+        }else{
+            var url=dom+"mkpath?"+ftbl.workpath+res;
+            gettext("mkdir",url,FileChange_OkWrn);
+        }
+    }
+    function removeArg(){
+        var n=0;
+        for(var i=stbl.titmctrls.length-1;i>=0;i--){
+            var a=stbl.titmctrls[i];
+            if(!a.querySelector("input.stkchk").checked){
+                a.remove();
+                stbl.titmctrls.splice(i,1);
+                n++;
+            }
+        }
+        if(n>0){
+            reload_tblobj(stbl);
+        }
+    }
+    function removePath(obj){
+        res=prompt("Put 'd' if you really want to delete selected files.");
+        if(res!="d"){
+            return;
+        }
+        var sfls={};
+        var cors=[];
+        var tgs="";
+        stbl.titmctrls.forEach((e,i)=>{
+            sfls[getfullpath(e)]=i;
+        });
+        ftbl.titmctrls.forEach((e,i)=>
+        {
+            if(e.querySelector("input.stkchk").checked)
+            {
+                var t=getfullpath(e);
+                if(t in sfls){
+                    cors.push(sfls[t]*1);
+                }
+                tgs+="rm -rf "+t+"\n";
+            }
+        });
+        cors.sort((a,b)=>(a-b));
+        for(var i=cors.length-1;i>=0;i--){
+            stbl.titmctrls[cors[i]].remove();
+            alert(cors[i]);
+            stbl.titmctrls.splice(cors[i],1);
+        }
+        if(cors.length>0){
+            reload_tblobj(stbl);
+        }
+        posttext("delcom",dom+"icmd?delcmd",FileChange_Ok,tgs);
+    }
+    function on_pallete(_id){
+        switch(_id){
+            case "f0":
+                addArg();
+                break;
+            case "f1":
+                toggleSel(ftbl);
+                break;
+            case "s0":
+                removeArg();
+                break;
+            case "s1":
+                toggleSel(stbl);
+                break;
+            case "f2":
+                makeDir();
+                break;
+            case "f3":
+                makeFile();
+                break;
+            case "f4":
+                removePath(ftbl);
+        }
+    }
+    ostbl.querySelector("th.tbltitle").innerHTML="File for arguments";
+    oftbl.querySelector("td.palette").innerHTML=makepalcmd("Add Args","f0")
+        +makepalcmd("All Toggle","f1")
+        +makepalcmd("MakeDir","f2")
+        +makepalcmd("NewFile","f3")
+        +makepalcmd("Delete","f4")
+        +"<br><br>";
+    ostbl.querySelector("td.palette").innerHTML=makepalcmd("UnStage not checked","s0")
+        +makepalcmd("Toggle","s1")
+        +makepalcmd("MoveTo","s2")
+        +makepalcmd("CopyTo","s3")
+        +makepalcmd("Delete","s4")
+        +"<br><br>";
+
+    function makeflist(obj){
+        function zerop(numstr,len){
+            if(numstr.length>=len) return numstr;
+            return (Array(len).join("0")+numstr).slice(-len);
+        }
+        function formated(refstr){
+            var refs=refstr.replace(/(\D)(\d)/g,"$1||&$2").replace(/(\d)(\D)/g,"$1||$2").replace(/^(\d)/g,"&$1").split("||");
+            var res="";
+            for(var i=0;i<refs.length;i++)
+            {
+                if(refs[i][0]=="&")
+                {
+                    res+=zerop(refs[i].substring(1),9);
+                }else{
+                    res+=refs[i];
+                }
+            }
+            return res;
+        }
+        function toArr(itm){
+            var ck=itm.querySelector("input.stkchk").checked?1:0;
+            var aln=itm.querySelector("select.argaln").value;
+            var fl=formated(itm.querySelector("a.fname").innerHTML);
+            var isdir=(fl[fl.length-1]=="/");
+            var pt=formated(itm.querySelector("div.wrkpath").innerHTML);
+            var sz=itm.querySelector("td.sz").innerHTML;
+            var sfix=sz.substring(sz.length-1);
+            var ext=fl.substring(fl.lastIndexOf("."));
+            var units="KMGTP";
+            var szi=units.indexOf(sfix);
+            if(szi>=0){
+                sz=sz.substring(0,sz.length-1)*Math.pow(1000,szi+1);
+            }else{
+                sz=1*sz;
+            }
+            var upd=itm.querySelector("td.updt").innerHTML.replace(/(<br>|\D)/g,"")*1;
+            if(isdir){
+                sz=0;
+            }
+            fl=(isdir?"0":"1")+fl;
+            ext=(isdir?"0":"1")+ext;
+            return [ck,fl,sz,upd,pt,ext,""];
+        }
+        obj.flist=[];
+        obj.dlist={};
+        for(var i=0;i<obj.titmctrls.length;i++){
+            var c=toArr(obj.titmctrls[i]);
+            obj.flist[i]=c;
+            obj.dlist[c[4]+c[1]]=i;
+        }
+    }
+    function dosort(obj){
+        var pt=obj.otbl.querySelector("table.ftbl");
+        function comp(a,b,idxs){
+            //alert1(a,b,"[",idxs,"]");
+            for(var i=0;i<idxs.length;i++){
+                var q=idxs[i][0];
+                if(a[q]>b[q]) return (idxs[i][1]?-1:1);
+                if(a[q]<b[q]) return (idxs[i][1]?1:-1);
+            }
+            return 0;
+        }
+        function compf(idxs){
+            var res;
+            idxstr="";
+            for(var i=0;i<idxs.length;i++){
+                idxstr+=(i>0?",":"")+`[${idxs[i]}]`;
+            }
+            //alert1reset();
+            eval(`res=(a,b)=>{
+                var g=comp(a[0],b[0],[${idxstr}]);
+                return g;
+            }`);
+            return res;
+        }
+        for(var i=0;i<obj.titmctrls.length;i++)
+        {
+            obj.flist[i][0]=obj.titmctrls[i].querySelector("input.stkchk").checked?1:0;
+            obj.flist[i][6]=obj.titmctrls[i].querySelector("select.argaln").value;
+            if(obj.flist[i][6]<0){
+                obj.flist[i][6]=99;
+            }
+        }
+        var sorted=obj.flist.slice().map((a,i)=>[a,i]);
+        sorted=sorted.sort(compf(obj.sortidxs)).map(([,i])=>[i]);
+        
+        FlistAlign_init(obj.faln,sorted);
+        var par=obj.otbl.querySelector("table.itemtbl");
+        var prev=par.querySelector("colgroup");
+        for(var i=0;i<sorted.length;i++){
+            var cur=obj.titmctrls[sorted[i]];
+            par.insertBefore(cur,prev.nextSibling);
+            prev=cur;
+        }
+    }
+    function resort(obj,idx){
+        if(idx==-1){
+            obj.sortidxs=[]
+        }else{
+            newidxs=[[idx,false]];
+            for(var i=0;i<obj.sortidxs.length;i++){
+                if(obj.sortidxs[i][0]!=idx)
+                {
+                    newidxs.push(obj.sortidxs[i]);
+                }else{
+                    newidxs[0]=obj.sortidxs[i];
+                    if(i==0){
+                        newidxs[i][1]=!newidxs[i][1];
+                    }
+                }
+            }
+            obj.sortidxs=newidxs;
+        }
+        var s=new Array(sortkind);
+        var clr=["#9fffff","#9fff9f","#ffff9f","#ffcf7f","ff9f9f","ff9f9f","ff9f9f"];
+        for(var i=0;i<s.length;i++){
+            s[i]=["&nbsp;",""];
+        }
+        for(var i=0;i<obj.sortidxs.length;i++){
+            s[obj.sortidxs[i][0]]=[`[${obj.sortidxs[i][1]?"v":"^"}:${i}]`,clr[i]];
+        }
+        for(var i=0;i<s.length;i++){
+            var tg=obj.otbl.querySelector("th.si"+i);
+            var tgi=tg.querySelector("span.soidx");
+            tgi.innerHTML=s[i][0];
+            tg.style.backgroundColor=s[i][1];
+        }
+    }
+    function resortevent(tgstr,i){
+        var res;
+        eval(`res=function(){
+            resort(${tgstr},${i});
+            dosort(${tgstr});
+            return false;
+        }`);
+        return res;
+    }
+    for(var i=0;i<sortkind;i++)
+    {
+        var fs=[[oftbl,"ftbl"],[ostbl,"stbl"]];
+        for(var fi=0;fi<2;fi++){
+            var tg=fs[fi][0].querySelector("th.si"+i);
+            tg.onclick=resortevent(fs[fi][1],i);
+            tg.oncontextmenu=resortevent(fs[fi][1],-1);
+        }
+    }
+    filer.appendChild(ostbl);
+    var que={};
+    function urlreqclient(name,url,callback,dct,abcallback){
+        if(name in que){
+            que[name].abort();
+        }
+        var abc=new AbortController();
+        var tmpdct=Object.assign({signal:abc.signal},dct);
+        //alert(JSON.stringify(tmpdct));
+        async function run(){
+            try{
+                var res=await fetch(url,tmpdct);
+                if(res.ok){
+                    if(callback!=null){
+                        callback(await res.text());
+                    }
+                }else{
+                    StateChange_Warning("Connection Response is not ok.");
+                    if(abcallback!=null){
+                        abcallback()
+                    }
+                }
+            }catch(err){
+                StateChange_Error(
+                    "Connect Failed!"
+                );
+                if(abcallback!=null){
+                    abcallback();
+                }
+            }
+        }
+        run();
+        que[name]=abc;
+    }
+    function gettext(name,url,callback,abcallback=null){
+        urlreqclient(name,url+"????"+Date.now(),callback,{},abcallback);
+    }
+    function posttext(name,url,callback,textdata,abcallback=null){
+        urlreqclient(name,url,callback,{
+            method:"POST",
+            headers: {"Content-Type": "text/plain"},
+            body: textdata
+        },abcallback);
+    }
+    function getsym(ele){
+        for(var i=0;i<tables.length;i++){
+            if(tables[i].otbl.contains(ele)){
+                return [tables[i],gettnum(tables[i],ele)];
+            }
+        }
+        return null;
+    }
+    function gettbody(ele){
+        if(!isNaN(ele) || ele==null) return ele;
+        var res=ele;
+        while(res!=null && res.tagName!="TBODY")
+        {
+            res=res.parentNode;
+        }
+        return res;
+    }
+    function gettnum(obj,tctl){
+        if(!isNaN(tctl) || tctl==null) return tctl;
+        tctl=gettbody(tctl);
+        for(var i=0;i<obj.titmctrls.length;i++){
+            if(obj.titmctrls[i]===tctl){
+                return i;
+            }
+        }
+        return null;
+    }
+    function get_titem(wd,fileszupdt){
+        var file=fileszupdt[0];
+        var sz=fileszupdt[1];
+        var updt=fileszupdt[2].split("_");
+        var arg_media=dom+"media?"+wd+file;
+        var arg_file=dom+"file?"+wd+file;
+        var arg_dl=dom+"dl/"+wd+file;
+        var ext=file.lastIndexOf(".");
+        var isdir=file.substring(file.length-1)=="/";
+        var fnm="";
+        var extstr="";
+        if(0 && ext>=0 && file.length-ext<8){
+            extstr=file.substring(ext);
+            fnm=file.substring(0,ext);
+        }else{
+            fnm=file;
+        }
+        if(0 && fnm.length>19){
+            fnm=fnm.substring(0,16)+"...";
+        }
+        fnm+=extstr;
+        sz=-(-sz);
+        var szprex="";
+        var kmgtp=["K","M","G","T","P"];
+        var szth=1;
+        for(var kmi=0;kmi<kmgtp.length;kmi++){
+            if(sz<szth*10000){
+                break;
+            }
+            szth*=1000;
+            szprex=kmgtp[kmi];
+        }
+        sz=(sz/szth);
+        var bs=1;
+        var tf=0;
+        if(sz<100){
+            bs=100;
+            tf=2;
+        }else if(sz<1000){
+            bs=10;
+            tf=1;
+        }
+        sz=Math.ceil(sz*bs)/bs;
+        if(szprex!=""){
+            sz=sz.toFixed(tf)+szprex;
+        }
+        var _updt=updt[0]+"<br>"+updt[1].split(".")[0];
+        var opts="";
+        for(var i=-1;i<10;i++){
+            if(i!=0)
+                opts+=`<option value=${i}>$${i>=0?i:"--"}</option>`;
+        }
+        rest=`
+            <tbody ondblclick="gettnum(this);Filelist_rgt_sel(... getsym(this));" oncontextmenu="Filelist_rgt_sel(getsym(this)[0],-1);">
+            <tr><td>
+                <input type=checkbox class=stkchk onclick="selchg(... getsym(this),true);Filelist_rgt_sel(getsym(this)[0],null);"><br><select class=argaln onchange="selchg(... getsym(this),false);" disabled>${opts}</select>
+            </td>
+            <td class="thumb" onclick="Filelist_showthumb(... getsym(this));">
+            <img class="thumb" >
+            </td><td><div class=fname><a class=fname href="javascript:void(0);" onclick="prev_show('${wd}','${fnm}',${isdir},false);" oncontextmenu="prev_show('${wd}','${fnm}',${isdir},true);">${fnm}</a></div><div class=wrkpath>${wd}</div>
+            </td>
+            <td class=sz>${sz}</td>
+            <td class=updt>${_updt}
+            <br><a href="${arg_dl}" ${isdir?" hidden":""}>[__DL__]</a>
+            </td>
+            </tr>
+            </tbody>
+        `;
+        return rest.replace(/^\s/g,"");
+    }
+    function selchg(obj,tnum,ischkchg){
+        if(ischkchg){
+            if(obj.selarr.find(q=>q==tnum)){
+                var ctl=null;
+                var chkd=obj.titmctrls[tnum].querySelector("input.stkchk").checked;
+                for(var i=0;i<obj.selarr.length;i++){
+                    var n=obj.selarr[i];
+                    ctl=obj.titmctrls[n];
+                    ctl.querySelector("input.stkchk").checked=chkd;
+                }
+            }
+            var n=0;
+            var ic=obj.titmctrls.length;
+            for(var i=0;i<ic;i++){
+                if(obj.titmctrls[i].querySelector("input.stkchk").checked){
+                    n++;
+                }
+            }
+            obj.otbl.querySelector("span.fselnum").innerHTML=n+"/"+ic;
+        }else{
+            var qobj=obj.titmctrls[tnum].querySelector("select");
+            if(qobj.value>=0){
+                obj.titmctrls.forEach((e)=>{
+                    var s=e.querySelector("select");
+                    if(qobj!=s && qobj.value==s.value){
+                        alert();
+                        s.value=-1;
+                    }
+                });
+            }
+        }
+        if(obj==stbl){
+            reloadargs(obj);
+        }
+    }
+
+    function toggleSel(obj){
+        var ic=obj.titmctrls.length;
+        var b=true;
+        for(var i=0;i<ic;i++){
+            if(!obj.titmctrls[i].querySelector("input.stkchk").checked){
+                b=false;
+            }
+        }
+        for(var i=0;i<ic;i++){
+            obj.titmctrls[i].querySelector("input.stkchk").checked=!b;
+        }
+        selchg(obj,null,true);
+        Filelist_rgt_sel(obj);
+    }
+    function addArg(){
+        var tgp=stbl.otbl.querySelector("itemtbl");
+        var n=0;
+        for(var i=0;i<ftbl.titmctrls.length;i++){
+            var ctl=ftbl.titmctrls[i];
+            if(ctl.querySelector("input.stkchk").checked)
+            {
+                var wa=ftbl.flist[i];
+                if(!(wa[4]+wa[1] in stbl.dlist)){
+                    stbl.titmctrls.push(ftbl.titmctrls[i].cloneNode(true));
+                    stbl.titmctrls[stbl.titmctrls.length-1].querySelector("select").disabled=false;
+                    n++;
+                }
+            }
+        }
+        if(n>0){
+            reload_tblobj(stbl);
+        }
+    }
+    function reload_tblobj(obj){
+        obj.flist=[];
+        obj.faln=new FlistAlign(null);
+        obj.selarr=[];
+        obj.selst=-1;
+        makeflist(obj);
+        obj.chg(obj);
+        dosort(obj);
+        selchg(obj,null,true);
+        Filelist_rgt_sel(obj,null);
+    }
+    function reloadargs(obj){
+
+        for(var i=0;i<obj.args.seq.length;i++){
+            obj.args.seq[i]="";
+        }
+        obj.titmctrls.forEach((e)=>
+        {
+            var i=e.querySelector("select").value;
+            if(i>=0){
+                obj.args.seq[i]=getfullpath(e);
+            }
+        });
+        obj.args.sel=[];
+        for(var i=0;i<obj.titmctrls.length;i++){
+            if(obj.titmctrls[i].querySelector("input.stkchk").checked && obj.titmctrls[i].querySelector("select").value<0){
+                obj.args.sel.push(getfullpath(obj.titmctrls[i]));
+            }
+        }
+        reloadargtable();
+    }
+    function reloadargtable(){
+        var tbd=argtbl.querySelector("tbody");
+        var res="";
+        var cttw=argtbl.querySelectorAll("th")[1].style.width;
+        var wpres=`<tr><td>$wp</td><td><div style="overflow:scroll;width:${cttw};">${ftbl.workpath}</div></td></tr>`;
+        for(var i=1;i<stbl.args.seq.length;i++){
+            res+=`<tr><td>$${i}</td><td><div style="overflow:scroll;width:${cttw};height:20px;">${stbl.args.seq[i]}</div></td></tr>`;
+        }
+        var selres=`<div style="overflow:scroll;width:${cttw};height:100px;">`;
+        for(var i=0;i<stbl.args.sel.length;i++){
+            if(i>=100){
+                selres+="(...more "+(stbl.args.sel.length-i)+" items.)";
+                break;
+            }
+            selres+=`[${i}]`+stbl.args.sel[i]+"<br>";
+        }
+        selres+="</div>";
+        res+=`<tr><td>$-</td><td>${selres}</td></tr>`;
+        tbd.innerHTML=wpres+res;
+        parseShell();
+    }
+    function removeitem(obj){
+        
+    }
+    function maketable(wd,arg){
+        //var wd="/mnt/sda2/python/https/";
+        //var wd="/mnt/sda2/smpimg";
+        if(wd==""){
+            wd=lastwd;
+        }else{
+            lastwd=wd;
+        }
+        if(arg==""){
+            wd+="?0-1999";
+        }else{
+            wd+="?"+arg;
+        }
+        wd+="????"+Date.now();
+        var tbli=ftbl.otbl.querySelector("table.itemtbl");
+        var colg=tbli.querySelector("colgroup");
+            var tblin="<colgroup>"+colg.innerHTML+"</colgroup>";
+        gettext("maketable",dom+"lsl?"+wd,function(resp)
+        {
+            respa=resp.split("\n");
+            if(respa[0]=="err>") return;
+            fls=respa[0].substring(3);
+            ftbl.otbl.querySelector("span.flnum").innerHTML=fls;
+            var opts="";
+            var flnum=fls.split("/")[0]*1;
+            var pgs=Math.floor(flnum/2000);
+            for(var i=0;i<=pgs;i++){
+                var ed=i*2000+1999;
+                if(ed>=flnum){
+                    ed=flnum-1;
+                }
+                var rng=(i*2000)+"-"+ed;
+                var sell=(rng==arg?" selected":"");
+                opts+=`<option value="${rng}"${sell}>${rng}</option>`;
+            }
+            getctrl(ftbl.otbl,"select.pagesel").innerHTML=opts;
+            
+            wd=respa[1];
+            var dinf=ftbl.otbl.querySelector("div.dirinfo");
+            var _wd=wd;
+            if(wd[wd.length-1]=="/"){
+                _wd=_wd.slice(0,-1);
+            }
+            var wda=_wd.split("/");
+            var spt="";
+            var curp="";
+            for(var i=0;i<wda.length;i++){
+                spt+=wda[i]+"/";
+                curp+=`<a href="javascript:void(0);" onclick="maketable('${spt}','');">${wda[i]}/</a>&nbsp;`;
+            }
+            dinf.innerHTML=curp;
+            files=new Array();
+            tmp=new Array();
+            for(var i=2;i<respa.length;i++){
+                var s=respa[i].split("|")[0];
+                if(s[s.length-1]=="/")
+                {
+                    files.push(respa[i]);
+                }else{
+                    tmp.push(i);
+                }
+            }
+            for(var i=0;i<tmp.length;i++){
+                if(respa[tmp[i]]!="")
+                    files.push(respa[tmp[i]]);
+                }
+            for(var f=0;f<files.length;f++){
+                var ear=files[f].split("|");
+                var q=get_titem(wd,ear);
+                tblin+=q;
+            }
+            tbli.innerHTML=tblin;
+            ftbl.titmctrls=tbli.querySelectorAll("tbody");
+            ftbl.workpath=wd;
+            reload_tblobj(ftbl);
+            reloadargtable();
+        });
+    }
+    function changefrange(){
+        var q=ftbl.otbl.querySelector("select.pagesel").value;
+        maketable(lastwd,q);
+    }
+    consoleinit(consolewnd);
+    reloadargs(stbl);
+    maketable(initpath,"");//"/mnt/sda2/smpimg");
+    loadshlist();
+</script>
+<script>
+    var pausing=null;
+    function makevideo(prv,furl){
+        var from_start=0;
+        var from_cur=1;
+        var from_end=2;
+        var vdd=null;
+        function makectrl(cls,text,type){
+            if(type=="checkbox"){
+                vl="";
+                te=text;
+            }else{
+                vl="value=\""+text+"\"";
+                te="";
+            }
+            return "<input class="+cls+" type="+type+" "+vl+" style=\"height: 50pt;\">"+te;
+        }
+        function makebut(cls,text){
+            return makectrl(cls,text,"button");
+        }
+        function maketext(cls,text){
+            return makectrl(cls,text,"text");
+        }
+        function makechk(cls,text){
+            return makectrl(cls,text,"checkbox");
+        }
+        function settime(ctl,ofst,fromwhere){
+            var newtime=0;
+            switch(fromwhere){
+                case from_start:
+                    newtime=0;
+                    break;
+                case from_cur:
+                    newtime=vdd.currentTime;
+                    break;
+                case from_end:
+                    newtime=vdd.duration;
+                    break;
+            }
+            newtime+=ofst;
+            if(newtime<0) newtime=0;
+            if(newtime>vdd.duration) newtime=vdd.duration;
+            vdd.currentTime=newtime;
+        }
+        function f(func, ...args){
+            return function(){return func(...args);};
+        }
+        function setspd(ctrl,spd){
+            var ck=ctrl.checked;
+            var ctls=[
+                "x12","x14","x18","x116","x15","x20","x40","x80","x160","x199"];
+            for(var ic=0;ic<ctls.length;ic++){
+                var cls="vdp_"+ctls[ic];
+                var ct=prv.querySelector("input."+cls);
+                ct.checked=false;
+            }
+            ctrl.checked=ck;
+            vdd.playbackRate=(ctrl.checked?spd:1.0);
+            var ps=(prv.querySelector("input.vdp_x199").checked);
+            vdd.controls=!ps;
+            if(ps){
+                vdd.pause();
+            }else{
+                vdd.play();
+            }
+            if(pausing!=null){
+                clearTimeout(pausing);
+                pausing=null;
+            }
+        }
+        function setpause(ctrl,spd){
+            var t=vdd.currentTime;
+            setspd(ctrl,spd);
+            if(ctrl.checked){
+                // pausing=setInterval(function(){vdd.currentTime=t;},0.2);
+            }
+        }
+        function setclkevt(cls,func,...args){
+            var ctl=prv.querySelector("input."+cls);
+            prv.querySelector("input."+cls).onclick=f(func,ctl,...args);
+        }
+        prv.innerHTML="<video class=vdd src=\""+dom+"file?"+furl+"\" controls></video><br><br><br>"
+            +"<div style=\"width:560;\">"
+            +makebut("vdp_st","___|<___")
+            +makebut("vdp_rr","___<<___")
+            +makebut("vdp_r","___<___")
+            +makebut("vdp_rs","___<f___")
+            +makebut("vdp_fs","___>f___")
+            +makebut("vdp_f","___>___")
+            +makebut("vdp_ff","___>>___")
+            +makebut("vdp_ed","___>|___")
+            +"<br><br>"
+            //+"<table><tr><td>"
+            //+makechk("vdp_pst","start preset")
+            //+"</td><td>"
+            //+maketext("vdp_vst","")
+            //+"</td></tr><tr><td>"
+            //+makechk("vdp_ped","end preset")
+            //+"</td><td>"
+            //+maketext("vdp_ved","")
+            //+"</td></tr></table>"
+            +"<table><tr><td>"
+            +makechk("vdp_x12","__x1/2__")
+            +"</td><td>"
+            +makechk("vdp_x14","__x1/4__")
+            +"</td><td>"
+            +makechk("vdp_x18","__x1/8__")
+            +"</td><td>"
+            +makechk("vdp_x116","__x1/16__")
+            +"</td><td>"
+            +makechk("vdp_x199","___||___")
+            +"</td></tr><tr><td>"
+            +makechk("vdp_x15","__x1.5__")
+            +"</td><td>"
+            +makechk("vdp_x20","__x2.0__")
+            +"</td><td>"
+            +makechk("vdp_x40","__x4.0__")
+            +"</td><td>"
+            +makechk("vdp_x80","__x8.0__")
+            +"</td><td>"
+            +makechk("vdp_x160","__x16.0__")
+            +"</td></tr></table></div>"
+            ;
+        vdd=prv.querySelector("video.vdd");
+        setclkevt("vdp_st",settime,0,from_start);
+        setclkevt("vdp_rr",settime,-10,from_cur);
+        setclkevt("vdp_r",settime,-1,from_cur);
+        setclkevt("vdp_rs",settime,-1/60,from_cur);
+        setclkevt("vdp_fs",settime,1/60,from_cur);
+        setclkevt("vdp_f",settime,1,from_cur);
+        setclkevt("vdp_ff",settime,10,from_cur);
+        setclkevt("vdp_ed",settime,0,from_end);
+        setclkevt("vdp_x12",setspd,1/2);
+        setclkevt("vdp_x14",setspd,1/4);
+        setclkevt("vdp_x18",setspd,1/8);
+        setclkevt("vdp_x116",setspd,1/16);
+        setclkevt("vdp_x199",setpause,1/16);
+        setclkevt("vdp_x15",setspd,1.5);
+        setclkevt("vdp_x20",setspd,2.0);
+        setclkevt("vdp_x40",setspd,4.0);
+        setclkevt("vdp_x80",setspd,8.0);
+        setclkevt("vdp_x160",setspd,16.0);
+    }
+    function cleanview(){
+        var v=prevtab.querySelector("video.vdd");
+        if(v!=null)
+        {
+            v.pause();
+            v.src="";
+            v.load();
+            if(pausing!=null){
+                clearTimeout(pausing);
+                pausing=null;
+            }
+        }
+        prevtab.innerHTML="&nbsp;";
+    }
+    function save_text(){
+        var url=dom+"s?"+prevtgfile.value;
+        posttext("saveprevtext",url,FileChange_Ok,prevtext.value);
+    }
+    function showctt(furl,isdbl)
+    {
+        var fprex="????"+Date.now();
+        function getorgfile(fname){
+            var fi=fname.search(/\.backup\.\d{4,}$/);
+            if(fi<0){
+                return fname;
+            }
+            return fname.slice(0,fi);
+        }
+        function restxt(restext,nodbl=false)
+        {
+            if(isdbl){
+                if(!nodbl){
+                    changeShellEdit(restext);
+                }
+            }
+            if(1){
+                prevtab.innerHTML=`<textarea style="width: 1200px;height: 800px;" id=prevtext></textarea><br><input type=button value="save[dbl click!]" class=defbut ondblclick="save_text();"><input type=text value="${furl}" id="prevtgfile" size=50>`;
+                //alert(prevtab.querySelector("textarea"));
+                prevtext.value=restext;
+            }
+        }
+        function restxt_f(restext){
+            restxt(restext,true);
+        }
+        function resmime(restext)
+        {
+            var mpr=restext.split("/")[0];
+            var sz=restext.split("//:")[1];
+            if(mpr=="image")
+            {
+                prevtab.innerHTML=`<img src="${dom}media?${furl}|${isdbl?"c":"b"}${fprex}">`;
+            }
+            else if(mpr=="text")
+            {
+                gettext("textprev",`${dom}file?${furl}`,restxt);
+            }
+            else if(mpr=="video" || mpr=="audio")
+            {
+                if(!isdbl){
+                    prevtab.innerHTML=`<img src="${dom}media?${furl}|${isdbl?"c":"b"}${fprex}">`;
+                }else{
+                    makevideo(prevtab,furl+fprex);
+                }
+                //initprgrbar(prv);
+            }
+            else
+            {
+                var orgurl=getorgfile(furl);
+                var ext=orgurl.slice(orgurl.lastIndexOf("."));
+                if(sz>=0 && sz<1024*1024){
+                    gettext("textprev",`${dom}file?${furl}`,restxt_f);
+                }
+            }
+            if(isdbl && ext==".shlist"){
+                loadshlist(furl);
+            }
+        }
+        var turl=dom+"mime?"+furl;
+        gettext("prevshow",turl,resmime);
+    }
+    function prev_show(wd,fname,isdir,isdbl){
+        if(isdir){
+            maketable(wd+fname,"");
+            if(isdbl){
+                cleanview();
+            }
+            return;
+        }
+        cleanview();
+        showctt(wd+fname,isdbl);
+    }
+</script>
+</body>
+</html>
