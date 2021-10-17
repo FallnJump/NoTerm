@@ -5,6 +5,7 @@
     /*document.addEventListener("touchend",function(e){
         e.preventDefault();
     });*/
+    var MAX_VIEW_FILES=2000;
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <body>
@@ -202,12 +203,12 @@
         <div hidden>
         <input type=button class=defbut value="   upper   ">
         <input type=button class=defbut value="   lower   ">
-        <input type=text size=100 id=imidiateln><br>
+        <input type=text size=100 id=immedln><br>
         </div>
-        <input type=button class=defbut value="    put    " onclick="imidedit_put();">
-        <input type=button class=defbut value="    add    " onclick="imidedit_add();">Name><input type=text id=termshlname size=50><br>
-        <textarea style="width:630px;height:100px;overflow:scroll;" ondblclick="chgImidiateMode(this);" id=imidedit></textarea>
-        <textarea style="width:630px;height:100px;overflow:scroll;" id=imidprs></textarea>
+        <input type=button class=defbut value="    put    " onclick="immedit_put();">
+        <input type=button class=defbut value="    add    " onclick="immedit_add();">Name><input type=text id=termshlname size=50><br>
+        <textarea style="width:630px;height:100px;overflow:scroll;" ondblclick="chgimmediateMode(this);" id=immedit></textarea>
+        <textarea style="width:630px;height:100px;overflow:scroll;" id=immprs readonly=""></textarea>
         <div style="font-size: 15pt;">Console log></div>
         <div ondblclick="consolewnd.reload_span();">
         <pre id=consolewnd style="width:1260px;height:300px;"></pre>
@@ -220,17 +221,44 @@
     <script>
 
     // ************ //
+
     function ShlSave(){
         fln=prompt("put the file name you want to save to",shlsaveat.value);
         if(fln==null || fln=="") {
             return;
         }
-        posttext("save_shl",dom+"s?"+fln,FileChange_OkWrn,shledit.value);
+        posttext("save_shl",dom+"s?"+parseStrCore(fln,false),FileChange_OkWrn,shledit.value);
         shlsaveat.value=fln;
     }
-    function Text_GetLineText(obj){
+    function Text_getTextBlock(obj){
+        function getTextBlock_core(src,startsym,endsym){
+            var stidx,edidx;
+            if(startsym==null){
+                stidx=-startsym.length;
+            }else{
+                stidx=src.lastIndexOf(startsym,st-1);
+            }
+            if(endsym==null){
+                edidx=src.length;
+            }else{
+                edidx=src.indexOf(endsym,st);
+                if(edidx<0){
+                    edidx=src.length;
+                }else{
+                    edidx+=endsym.length;
+                }
+            }
+            return [stidx,edidx];
+        }
         var st=obj.selectionStart;
         var src=obj.value;
+        var ln=getTextBlock_core(src,"\n","\n");
+        var sco=getTextBlock_core(src,"${","$}");
+        var scc=getTextBlock_core(src,"$}","${");
+        if(scc[0]<sco[0] && ln[0]>sco[0]){
+            return src.slice(sco[0],sco[1]);
+        }
+        return src.slice(ln[0]+1,ln[1]);
         var srcl=src.length;
         var stl=src.lastIndexOf("\n",st-1)+1;
         var edl=src.indexOf("\n",st);
@@ -278,11 +306,13 @@
         var obj=e.srcElement;
         if(obj.runmode){
             if(e.keyCode==13){
+                var blktxt=Text_getTextBlock(obj);
+                blktxt=parseStrCore(blktxt);
                 posttext("shellcom",dom+"cmd?"+consolewnd.selkey,function(restext){
                     StateChange_OkWrn(restext);
                     consolewnd.reload_span(null,true);
                 }
-                ,Text_GetLineText(obj));
+                ,blktxt);
                 return Text_ToNextLine(obj);
             }
         }
@@ -292,7 +322,7 @@
         var reqtsk="exec";
         var cdwp="cd "+ftbl.workpath+"\n";
         var url=dom;
-        var ctt=cdwp;
+        var ctt=cdwp + shlprs.value;
         switch(mode){
             case -1:
                 url+="qcmd?Term";
@@ -322,18 +352,16 @@
         obj.parseAt.timer=null;
     }
     
-
     Text_AttachParseAt(shledit,shlprs);
-    Text_AttachParseAt(imidedit,imidprs);
+    Text_AttachParseAt(immedit,immprs);
     shledit.onkeydown=function(e){
         return Text_KdNotBlur(e);
     };
-    imidedit.onkeydown=function(e){
+    immedit.onkeydown=function(e){
         return Text_KdRun(e);
     };
     sttdiv.timer=null;
     sttdiv.colors=[["#ccffff","#00ffff"],["#ffffcc","#ffff00"],["#ffcccc","ff7f7f"]];
-    var lastwd="";
     var sortkind=7;
     var oftbl=document.body.querySelector("table.ftbl");
     var ostbl=oftbl.cloneNode(true);
@@ -493,7 +521,6 @@
         }
         for(var i=0;i<obj.selarr.length;i++){
             var tg=obj.titmctrls[obj.selarr[i]];
-            
             tg.style.backgroundColor="rgb(127,255,255)";
         }
     }
@@ -525,7 +552,10 @@
     var ftbl=new Filelist(oftbl);
     var stbl=new Filelist(ostbl);
     var tables=[ftbl,stbl];
-    imidedit.runmode=false;
+    immedit.runmode=false;
+    immedit.ondblclick=function(e){
+        chgimmediateMode(e.srcElement);
+    };
     </script>
     <script>
 
@@ -542,9 +572,9 @@
             }
         }
     }
-    function chgImidiateMode(obj){
-        imidedit.runmode=!imidedit.runmode;
-        imidedit.style.backgroundColor=imidedit.runmode?"#ffffcc":"#ffffff";
+    function chgimmediateMode(obj){
+        obj.runmode=!obj.runmode;
+        obj.style.backgroundColor=obj.runmode?"#ffffcc":"#ffffff";
     }
     function commontbl_delrow(obj){
         getParentTag(obj,"TR").remove();
@@ -579,17 +609,32 @@
     function clearShell(){
         changeShellEdit("");
     }
-    function parseStrCore(ref){
+
+    function parseStrCore(ref,withhyph=true){
+        function reptext(tgstr,key,repto){
+            var suf="";
+            if(repto[repto.length-1]=="/"){
+                suf="\\/?";
+            }
+            return tgstr.replace(RegExp("\\"+key+suf,"g"),repto);
+        }
         var seqs=argtbl.querySelector("tbody").querySelectorAll("tr");
+        if(seqs==null){
+            return ref;
+        }
         seqs.forEach((e)=>{
             var tds=e.querySelectorAll("td");
             var argnm=tds[0].innerHTML;
             var ctt=tds[1].querySelector("div").innerHTML;
+            
             if(argnm[0]=="$" && ctt!="" && argnm!="$-"){
-                argrg=new RegExp("\\"+argnm,"g");
-                ref=ref.replace(argrg,ctt);
+                ref=reptext(ref,argnm,ctt);
             }
         });
+        
+        if(!withhyph){
+            return ref;
+        }
         function rplaceline(refsect){
             var res=[];
             while(true){
@@ -612,10 +657,11 @@
             for(var i=0;i<res.length;i+=2){
                 rstr+=res[i];
                 for(var t=0;t<stbl.args.sel.length;t++){
-                    rstr+=res[i+1].replace(/\$\-/g,stbl.args.sel[t]);
+                    rstr+=reptext(res[i+1],"$-",stbl.args.sel[t]);
                 }
             }
-            return rstr+refsect;
+            return rstr+refsect
+            
         }
         var refa=ref.split("${");
         res=rplaceline(refa[0]);
@@ -631,12 +677,13 @@
             }
             rstr="";
             for(var t=0;t<stbl.args.sel.length;t++){
-                rstr+=tktmpl.replace(/\$\-/g,stbl.args.sel[t]);
+                rstr+=reptext(tktmpl,"$-",stbl.args.sel[t]);
             }
             res+=rstr+tkend;
         }
         return res;
     }
+
     function parseShell_core(obj){
         obj.parseAt.innerHTML=parseStrCore(obj.value);
         if(obj.parseAt.timer!=null){
@@ -645,7 +692,7 @@
         }
     }
     function parseShell(){
-        var objs=[shledit,imidedit];
+        var objs=[shledit,immedit];
         for(var i=0;i<objs.length;i++){
             parseShell_core(objs[i]);
         }
@@ -737,18 +784,18 @@
         commonshell_put(palitemtbl_getrow(obj)[1]);
     }
     function palitemtbl_putr(obj){
-        commonshell_put(palitemtbl_getrow(obj)[1],imidedit);
+        commonshell_put(palitemtbl_getrow(obj)[1],immedit);
     }
-    function imidedit_put(){
-        commonshell_put(imidedit.value);
+    function immedit_put(){
+        commonshell_put(immedit.value);
     }
-    function imidedit_add(){
-        commonshell_onadd(termshlname.value,imidedit.value);
+    function immedit_add(){
+        commonshell_onadd(termshlname.value,immedit.value);
         return;
         var add_tr=palitemtbl.querySelectorAll("tr")[0];
         palitemtbl_onad
         add_tr.querySelector("input[type=text").value=termshlname.value;
-        add_tr.querySelector("textarea").value=imidedit.value;
+        add_tr.querySelector("textarea").value=immedit.value;
     }
     function loadshlist(fnm=null){
         if(fnm!=null){
@@ -774,7 +821,7 @@
         gettext("shtext",dom+"file?"+shlistsel.value,load_core,()=>{load_core("");});
     }
     function saveshlist(){
-        posttext("saveshlist",dom+"sf?"+shlistsel.value,FileChange_Ok,palitemtbl_row2shlist());
+        posttext("saveshlist",dom+"s?"+parseStrCore(shlistsel.value),FileChange_Ok,palitemtbl_row2shlist());
     }
     function toggleview(idx){
         var tabs=[prevtab,commtab,shltab];
@@ -849,6 +896,7 @@
                     var tbd=getParentTag(tobj,"TABLE");
                     tbd.scrollTop=tbd.scrollHeight;
                 }
+                reloadstatus();
             },()=>{tobj.reload_reserved=false;tobj.lasttime=0;tobj.reload_spantimer=null;});
         }
         obj.reload_span=function(selkey=null,withendscroll=false){
@@ -867,6 +915,9 @@
         trs.forEach((e)=>{
             var selkey=e.querySelectorAll("td")[1].innerHTML;
             var clr;
+            var itms=e.querySelectorAll("td");
+            var ended=(itms[itms.length-1].querySelector("div").innerHTML=="ended.");
+            itms[0].querySelector("input").disabled=ended;
             if(consolewnd.selkey==selkey){
                 if(consolewnd.reload_reserved){
                     clr="#ccffff";
@@ -874,12 +925,10 @@
                     clr="#ffffcc";
                 }
             }else{
-                var itms=e.querySelectorAll("td");
-                if(itms[itms.length-1].querySelector("div").innerHTML!="ended."){
+                if(!ended){
                     clr="#ffffff";
                 }else{
                     clr="#c0c0c0";
-                    itms[0].querySelector("input").disabled=true;
                 }
             }
             e.style.backgroundColor=clr;
@@ -899,7 +948,7 @@
                     maxe=e;
                 }
             });
-            tdobj=maxe;
+            tdobj=maxe.querySelector("td");
             if(tdobj==null) return;
         }
         consolewnd.reload_span(tdobj.parentNode.querySelectorAll("td")[1].innerHTML
@@ -967,7 +1016,6 @@
             return;
         }else{
             var url=dom+"mkpath?"+ftbl.workpath+res+"/";
-            alert(url);
             gettext("mkdir",url,FileChange_OkWrn);
         }
     }
@@ -994,6 +1042,20 @@
             reload_tblobj(stbl);
         }
     }
+    function movefile(iscopy=false){
+        var ls=stbl.args.sel;
+        var mes="";
+        var res=prompt("Put 'm' if you really want to move/copy selected files. Put 'mf' to force-move/copy.");
+        if(res!="m" && res != "mf"){
+            return;
+        }
+        for(var i=0;i<ls.length;i++){
+            mes+=(i>0?";":"")+ls[i]+":"+ftbl.workpath+"/";
+        }
+        var opefix=(res=="mf"?"f":"");
+        var ope=(iscopy?"copy":"move");
+        posttext("movefile",dom+ope+opefix+"?.",StateChange_Ok,mes);
+    }
     function removePath(obj){
         res=prompt("Put 'd' if you really want to delete selected files.");
         if(res!="d"){
@@ -1005,7 +1067,7 @@
         stbl.titmctrls.forEach((e,i)=>{
             sfls[getfullpath(e)]=i;
         });
-        ftbl.titmctrls.forEach((e,i)=>
+        obj.titmctrls.forEach((e,i)=>
         {
             if(e.querySelector("input.stkchk").checked)
             {
@@ -1019,13 +1081,32 @@
         cors.sort((a,b)=>(a-b));
         for(var i=cors.length-1;i>=0;i--){
             stbl.titmctrls[cors[i]].remove();
-            alert(cors[i]);
             stbl.titmctrls.splice(cors[i],1);
         }
         if(cors.length>0){
             reload_tblobj(stbl);
         }
         posttext("delcom",dom+"icmd?delcmd",FileChange_Ok,tgs);
+    }
+    function renameFile(obj){
+        for(var i=0;i<obj.titmctrls.length;i++){
+            if(obj.titmctrls[i].querySelector("input.stkchk").checked){
+                var wrkpath=obj.titmctrls[i].querySelector("div.wrkpath").innerHTML;
+                var fname=obj.titmctrls[i].querySelector("a.fname").innerHTML;
+                res=prompt("put renamed file name",fname);
+                if(res==null || res=="" || res==fname){
+                    return;
+                }
+                gettext("rename",dom+"rename?"+wrkpath+fname+":"+wrkpath+res,function(restext){
+                    if(restext!="ok"){
+                        FileChange_OkWrn(restext);
+                    }else{
+                        FileChange_OkWrn(restext);
+                    }
+                });
+                break;
+            }
+        }
     }
     function on_pallete(_id){
         switch(_id){
@@ -1049,6 +1130,19 @@
                 break;
             case "f4":
                 removePath(ftbl);
+                break;
+            case "s4":
+                removePath(stbl);
+                break;
+            case "s2":
+                movefile(false);
+                break;
+            case "s3":
+                movefile(true);
+                break;
+            case "f5":
+                renameFile(ftbl);
+                break;
         }
     }
     ostbl.querySelector("th.tbltitle").innerHTML="File for arguments";
@@ -1056,6 +1150,7 @@
         +makepalcmd("All Toggle","f1")
         +makepalcmd("MakeDir","f2")
         +makepalcmd("NewFile","f3")
+        +makepalcmd("Rename","f5")
         +makepalcmd("Delete","f4")
         +"<br><br>";
     ostbl.querySelector("td.palette").innerHTML=makepalcmd("UnStage not checked","s0")
@@ -1377,7 +1472,6 @@
                 obj.titmctrls.forEach((e)=>{
                     var s=e.querySelector("select");
                     if(qobj!=s && qobj.value==s.value){
-                        alert();
                         s.value=-1;
                     }
                 });
@@ -1477,15 +1571,8 @@
         
     }
     function maketable(wd,arg){
-        //var wd="/mnt/sda2/python/https/";
-        //var wd="/mnt/sda2/smpimg";
-        if(wd==""){
-            wd=lastwd;
-        }else{
-            lastwd=wd;
-        }
         if(arg==""){
-            wd+="?0-1999";
+            wd+="?0-"+MAX_VIEW_FILES;
         }else{
             wd+="?"+arg;
         }
@@ -1501,13 +1588,13 @@
             ftbl.otbl.querySelector("span.flnum").innerHTML=fls;
             var opts="";
             var flnum=fls.split("/")[0]*1;
-            var pgs=Math.floor(flnum/2000);
+            var pgs=Math.floor(flnum/MAX_VIEW_FILES);
             for(var i=0;i<=pgs;i++){
-                var ed=i*2000+1999;
+                var ed=(i+1)*MAX_VIEW_FILES-1;
                 if(ed>=flnum){
                     ed=flnum-1;
                 }
-                var rng=(i*2000)+"-"+ed;
+                var rng=(i*MAX_VIEW_FILES)+"-"+ed;
                 var sell=(rng==arg?" selected":"");
                 opts+=`<option value="${rng}"${sell}>${rng}</option>`;
             }
@@ -1556,7 +1643,20 @@
     }
     function changefrange(){
         var q=ftbl.otbl.querySelector("select.pagesel").value;
-        maketable(lastwd,q);
+        function res(restext){
+            var fn=restext.split("\n")[0].split(">")[1].split("/")[0];
+            var frng=q.split("-");
+            if(frng[0]<fn){
+                frng[0]=Math.floor(fn/MAX_VIEW_FILES)*MAX_VIEW_FILES;
+            }
+            frng[1]=fn;
+            if(frng[1]-frng[0]>=MAX_VIEW_FILES)
+            {
+                frng[1]=frng[0]+MAX_VIEW_FILES-1;
+            }
+            maketable(ftbl.workpath,frng.join("-"));
+        }
+        gettext("estimfile",dom+"lsl?"+ftbl.workpath+"?1-0",res);
     }
     consoleinit(consolewnd);
     reloadargs(stbl);
@@ -1739,6 +1839,7 @@
             if(isdbl){
                 if(!nodbl){
                     changeShellEdit(restext);
+                    shlsaveat.value=furl;
                 }
             }
             if(1){

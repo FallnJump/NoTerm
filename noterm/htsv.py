@@ -168,10 +168,10 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 		resbin=self.encode(res)
 		return BytesIO(resbin), len(resbin)
 	
-	def get_mv_core(self, arg, withchk):
+	def get_mv_core(self, arg, withchk, iscopy):
 		res="move>\n"
 		self.resp_ok()
-		MoveFile(arg,withchk)
+		MoveFile(arg,withchk,iscopy)
 		self.header_for_text()
 		res+="OK"
 		resbin=self.encode(res)
@@ -216,7 +216,7 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 		t=mimetypes.guess_type(arg)[0]
 		if t is None:
 			t="None/None"
-			t+="//:"
+		t+="//:"
 		if not os.path.exists(arg):
 			t+="-1"
 		else:
@@ -248,10 +248,17 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 		return cv2.imread(arg)
 	
 	def get_move(self, arg):
-		return self.get_mv_core(arg,True)
+		return self.get_mv_core(arg,True, False)
 	
 	def get_forcemove(self, arg):
-		return self.get_mv_core(arg,False)
+		return self.get_mv_core(arg,False, False)
+	
+	def get_copy(self, arg):
+		return self.get_mv_core(arg,True, True)
+	
+	def get_forcecopy(self, arg):
+		return self.get_mv_core(arg,False, True)
+		
 	
 	def get_media_core(self,arg):
 		arga=arg.split("|")
@@ -590,6 +597,17 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 			StopProc(t)
 		return self.get_status(arg)
 	
+	def do_rename(self,arg):
+		args=arg.split(":")
+		if os.path.exists(args[1]):
+			res="err>\ndest path: "+ args[1]+" already exists."
+		elif not os.path.exists(args[0]):
+			res="err>\ntarget path: "+ args[0] +" does not exist."
+		else:
+			res="ok"
+			os.rename(args[0],args[1])
+		return self.simple_ok(res)
+	
 	def get_Main(self,arg):
 		#refpath=self.headers.get("referer")
 		wrk=os.path.split(__file__)[0]
@@ -622,7 +640,6 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 		self.header_for_mime(htmlpath)
 		resbin=self.encode(resp)
 		return BytesIO(resbin),len(resbin)
-
 
 	def do_GET(self):
 		title = "HTTP Stub"
@@ -661,7 +678,8 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 			("icmd_log",self.do_ilog),
 			("icmd",self.do_icmd),
 			("swapbk",self.do_swapbk),
-			("main",self.get_Main)
+			("main",self.get_Main),
+			("rename",self.do_rename)
 			]
 		strm=None
 		for pair in cmd_and_func:
@@ -695,7 +713,10 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 		tgopt,topath=self.path.split("????")[0].split("?")[:2]
 		tgopt=tgopt[1:]
 		flsave=True
-		if tgopt=="cmd" or tgopt=="icmd" or tgopt=="qcmd":
+		if tgopt=="move" or tgopt=="movef" or tgopt=="copy" or tgopt=="copyf":
+			flsave=False
+			rps=self.decode(rpd)
+		elif tgopt=="cmd" or tgopt=="icmd" or tgopt=="qcmd":
 			flsave=False
 			rps=topath+"|||"+self.decode(rpd)
 		elif "s" in tgopt:
@@ -740,6 +761,14 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 				strm=self.do_icmd(rps)
 			elif tgopt=="qcmd":
 				strm=self.do_qcmd(rps)
+			elif tgopt=="move":
+				strm=self.get_move(rps)
+			elif tgopt=="movef":
+				strm=self.get_forcemove(rps)
+			elif tgopt=="copy":
+				strm=self.get_copy(rps)
+			elif tgopt=="copyf":
+				strm=self.get_forcecopy(rps)
 		if strm is None:
 			self.resp_reqfail()
 			return

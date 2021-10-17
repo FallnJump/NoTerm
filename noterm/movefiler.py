@@ -123,14 +123,19 @@ def makemovelist(srcpath,destpath, makeroot=False):
 	r=mk.makemovelist_core(srcf,destf)
 	return True,(srcdir,destdir,r)
 
-def makeshellscript(lst):
+def makeshellscript(lst, iscopy=False):
 	cmd=""
 	srcrt,destrt=lst[0],lst[1]
 	for li in lst[2][0]:
 		if li[1]!="<rmdir>":
-			cmd+="mv "+os.path.join(srcrt,li[0])+" " + os.path.join(destrt,li[1]) + "\n"
+			if not iscopy:
+				cope="mv"
+			else:
+				cope="cp -r"
+			cmd+=cope+" "+os.path.join(srcrt,li[0])+" " + os.path.join(destrt,li[1]) + "\n"
 		else:
-			cmd+="rmdir "+os.path.join(srcrt,li[0])
+			if not iscopy:
+				cmd+="rmdir "+os.path.join(srcrt,li[0])
 	return cmd
 
 class Wrkpath:
@@ -303,9 +308,10 @@ def getStatusLog():
 	return res
 
 class MoveFile(SubProcWrap):
-	def __init__(self,arg,withchk):
+	def __init__(self,arg,withchk,iscopy=False):
 		self.arg=arg
 		self.withchk=withchk
+		self.iscopy=iscopy
 		super().__init__(self.run_thread,"MoveFile",(self.arg,self.withchk))
 
 	def run_thread(self):
@@ -323,7 +329,10 @@ class MoveFile(SubProcWrap):
 					errout+=errTemp+"Invalid Token.\n"
 					continue
 				srcp=srcwrk.getabspath(tarr[0])
-				destp=destwrk.getabspath(tarr[1])
+				tg=tarr[1]
+				if tg[-1]=="/":
+					tg+=os.path.split(srcp)[1]
+				destp=destwrk.getabspath(tg)
 				res, lst=makemovelist(srcp,destp,not self.withchk)
 				if not res:
 					errout+=errTemp+lst
@@ -333,7 +342,7 @@ class MoveFile(SubProcWrap):
 						errout+=ls[0]+"  -->  "+ls[1]+": dest path already exists.\n"
 				#prs+=lst[2][0]
 				if errout=="":
-					src+=makeshellscript(lst)
+					src+=makeshellscript(lst,self.iscopy)
 			if errout=="":
 				lstarr=src.split("\n")
 				for s in lstarr:
@@ -345,6 +354,9 @@ class MoveFile(SubProcWrap):
 				self.out=("STOP" if self._stopflag else "OK") + self.out
 			else:
 				self.out=errout
+				errout_a=errout.split("\n")
+				for ln in errout_a:
+					self.putoutputlog(ln)
 
 class ConvertMovie(SubProcWrap):
 	def __init__(self,args):
