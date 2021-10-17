@@ -104,9 +104,9 @@ class MyHdler(srv.BaseHTTPRequestHandler):
 		else:
 			dpt=arg
 		dpt=os.path.join(dpt,"")
-		cmd="ls --full-time " if exinfo else "ls "
+		cmd="ls -a --full-time " if exinfo else "ls -a "
 		stofs=1 if exinfo else 0
-		fcnt=self.reqls.req("ls -U1 "+arg+"|wc -l")[:-1]
+		fcnt=self.reqls.req("ls -a -U1 "+arg+"|wc -l")[:-1]
 		fcnt=int(fcnt)
 		if sted is not None:
 			tcmd="|head -n "+str(sted[1]+1+stofs)+"|tail -n "+str(sted[1]-sted[0]+1)
