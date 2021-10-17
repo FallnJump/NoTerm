@@ -62,6 +62,10 @@
 
     pip install git+https://github.com/FallnJump/NoTerm
 
+もしくは、pypiから以下でインストール可能。
+
+    pip install noterm
+
 
 使用ライブラリはnumpy,opencv-python,glob2です。
 
