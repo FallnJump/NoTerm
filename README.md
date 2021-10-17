@@ -60,8 +60,8 @@
 サーバpcに対してpython>=3.6で、以下のコマンドでインストールできます:
 (git cloneして、モジュールをpipする)
 
-    git clone https://github.com/FallnJump/NoTerm
-    pip install -e Noterm
+    pip install git+https://github.com/FallnJump/NoTerm
+
 
 使用ライブラリはnumpy,opencv-python,glob2です。
 
