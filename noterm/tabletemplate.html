@@ -1784,7 +1784,8 @@
             +makechk("vdp_x80","__x8.0__")
             +"</td><td>"
             +makechk("vdp_x160","__x16.0__")
-            +"</td></tr></table></div>"
+            +"</td><td>"+makebut("scrshot","screenshot")
+            +"</td></tr></table></div><hr><canvas hidden></canvas><img class=scrsht>"
             ;
         vdd=prv.querySelector("video.vdd");
         setclkevt("vdp_st",settime,0,from_start);
@@ -1805,6 +1806,20 @@
         setclkevt("vdp_x40",setspd,4.0);
         setclkevt("vdp_x80",setspd,8.0);
         setclkevt("vdp_x160",setspd,16.0);
+        setclkevt("scrshot",video2Img,prv);
+    }
+    function video2Img(obj, prvObj){
+        let vidObj=prvObj.querySelector("video");
+        let imgObj=prvObj.querySelector("img");
+        let wrkcvs=document.createElement("canvas");
+        wrkcvs.width=vidObj.clientWidth;
+        wrkcvs.height=vidObj.clientHeight;
+        
+        let ctx=wrkcvs.getContext("2d");
+        ctx.fillRect(0,0,wrkcvs.width,wrkcvs.height);
+        ctx.drawImage(vidObj, 0, 0, wrkcvs.width, wrkcvs.height);
+        imgObj.src=wrkcvs.toDataURL();
+        wrkcvs.remove();
     }
     function cleanview(){
         var v=prevtab.querySelector("video.vdd");
